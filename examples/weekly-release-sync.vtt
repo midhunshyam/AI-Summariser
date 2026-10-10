@@ -1,0 +1,161 @@
+WEBVTT
+
+1
+00:00:02.140 --> 00:00:05.610
+Maya: Morning, everyone. We've got four things to get through today.
+
+2
+00:00:05.890 --> 00:00:11.020
+Maya: The 2.4 release, the crash on older Android phones, the new onboarding screens, and the Q&amp;A session for the support team.
+
+3
+00:00:11.950 --> 00:00:14.300
+Tom: Sounds good. Do you want me to start with the crash?
+
+4
+00:00:14.720 --> 00:00:16.010
+Maya: Yes, go ahead.
+
+5
+00:00:16.640 --> 00:00:23.180
+Tom: So the crash happens when offline sync resumes after the app has been in the background for a long time.
+
+6
+00:00:23.400 --> 00:00:29.950
+Tom: The sync queue was being read before the database had finished opening, so on slower phones it hit a null reference.
+
+7
+00:00:30.310 --> 00:00:35.470
+Tom: The fix is merged. It waits for the database before replaying the queue.
+
+8
+00:00:36.020 --> 00:00:40.880
+Priya: I ran it in the device lab yesterday. It's fixed on most of the phones we had trouble with.
+
+9
+00:00:41.200 --> 00:00:47.610
+Priya: Two older models still crash, both on Android 9. I think it's a different stack trace though.
+
+10
+00:00:48.000 --> 00:00:51.330
+Tom: Can you send me the logs from those two? I'll take a look this afternoon.
+
+11
+00:00:51.700 --> 00:00:53.020
+Priya: Will do.
+
+12
+00:00:53.500 --> 00:01:00.240
+Maya: How many users are we talking about? If it's under one percent I don't want to hold everything up for it.
+
+13
+00:01:00.800 --> 00:01:06.950
+Tom: Android 9 is about three percent of active users, and those two models are a small slice of that. Well under one percent.
+
+14
+00:01:07.400 --> 00:01:14.730
+Priya: The bigger issue is the regression run. I've only finished about half of it. The payments flow and the settings screens are still left.
+
+15
+00:01:15.100 --> 00:01:18.500
+Priya: Realistically I can finish by Wednesday afternoon.
+
+16
+00:01:19.000 --> 00:01:24.660
+Maya: Then Thursday is too tight. I'd rather move the release to next Tuesday than ship without the full regression run.
+
+17
+00:01:25.000 --> 00:01:27.400
+Tom: Agreed. Tuesday gives us room if those two phones need another fix.
+
+18
+00:01:27.800 --> 00:01:29.900
+Daniel: Fine by me.
+
+19
+00:01:30.300 --> 00:01:34.020
+Maya: Okay, so 2.4 moves to next Tuesday. I'll tell the support team today.
+
+20
+00:01:34.500 --> 00:01:38.810
+Maya: Daniel, do you want to talk us through the onboarding screens?
+
+21
+00:01:39.300 --> 00:01:45.900
+Daniel: Sure. We tested three versions with eight people last week. Version B, the one with the progress bar, did best.
+
+22
+00:01:46.300 --> 00:01:53.420
+Daniel: Seven of the eight got through it without help. With version A it was four, and version C confused people on the permissions step.
+
+23
+00:01:54.000 --> 00:01:58.210
+Maya: That's a clear result. Can B go into 2.4, or is it too late now?
+
+24
+00:01:58.700 --> 00:02:04.990
+Tom: Too late, I think. It touches the sign-up code and I don't want to change that a week before release.
+
+25
+00:02:05.400 --> 00:02:08.100
+Daniel: That's fair. It would fit well in 2.5.
+
+26
+00:02:08.500 --> 00:02:12.330
+Maya: Fine. Version B goes into 2.5, not 2.4.
+
+27
+00:02:12.800 --> 00:02:16.990
+Daniel: I'll finish the final designs and share them before next week's sync.
+
+28
+00:02:17.400 --> 00:02:21.750
+Daniel: I still need to shorten the wording on the last screen. It's too long at the moment.
+
+29
+00:02:22.200 --> 00:02:28.080
+Maya: Last thing, the Q&amp;A with support. They want to know what changed in 2.4 and what to tell customers about the crash.
+
+30
+00:02:28.500 --> 00:02:33.420
+Tom: I can write up the root cause in plain language for them. Is Friday okay?
+
+31
+00:02:33.800 --> 00:02:36.100
+Maya: Friday's good. Priya, can you join the session too?
+
+32
+00:02:36.500 --> 00:02:40.220
+Priya: Yes, as long as it's after the regression run is done.
+
+33
+00:02:40.600 --> 00:02:44.880
+Maya: Thursday morning then. I'll send an invite.
+
+34
+00:02:45.300 --> 00:02:47.300
+Maya: Anything else before we wrap up?
+
+35
+00:02:47.700 --> 00:02:53.120
+Tom: Just a reminder that the staging server certificate expires at the end of the month. Someone needs to renew it.
+
+36
+00:02:53.500 --> 00:02:56.950
+Maya: Can you take that, Tom, or should I ask the platform team?
+
+37
+00:02:57.300 --> 00:03:00.710
+Tom: Ask the platform team, please. I've got enough on with the crash.
+
+38
+00:03:01.100 --> 00:03:04.230
+Maya: Fair enough. I'll raise it with them.
+
+39
+00:03:04.600 --> 00:03:07.400
+Maya: Okay, thanks everyone. Same time next week.
+
+40
+00:03:07.800 --> 00:03:08.900
+Daniel: Thanks, bye.

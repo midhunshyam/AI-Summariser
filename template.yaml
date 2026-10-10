@@ -1,0 +1,144 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >-
+  Zoom meeting summariser. A webhook function checks Zoom's signature and queues
+  transcript events; a worker function summarises the transcript with an OpenAI
+  model and e-mails the result through the Gmail API.
+
+Parameters:
+  SecretArn:
+    Type: String
+    AllowedPattern: "^arn:aws[a-z-]*:secretsmanager:.+"
+    Description: >-
+      ARN of the Secrets Manager secret holding ZOOM_WEBHOOK_SECRET, OPENAI_API_KEY,
+      GMAIL_TOKEN_JSON and, optionally, ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET and ZOOM_ACCOUNT_ID.
+  EmailTo:
+    Type: String
+    Description: Comma-separated list of people who receive the summaries.
+  EmailFrom:
+    Type: String
+    Default: ""
+    Description: >-
+      Optional From header, such as "Meeting summaries <you@example.com>". Leave empty
+      to send from the Gmail account that authorised the token.
+  EmailGreeting:
+    Type: String
+    Default: "Hi all,"
+    Description: First line of every e-mail.
+  TimeZone:
+    Type: String
+    Default: UTC
+    Description: IANA time zone for the meeting date in the e-mail, such as Australia/Sydney.
+  OpenAIModel:
+    Type: String
+    Default: gpt-4o-mini
+    Description: OpenAI chat model. It must support Structured Outputs (JSON schema).
+  ChunkTokens:
+    Type: Number
+    Default: 12000
+    MinValue: 500
+    Description: Longest transcript chunk, in tokens, sent in one request.
+  EnableDedupe:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    Description: Create a DynamoDB table so that each recording is e-mailed only once.
+
+Conditions:
+  UseDedupe: !Equals [!Ref EnableDedupe, "true"]
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures: [arm64]
+    CodeUri: src/
+    Environment:
+      Variables:
+        SECRET_ID: !Ref SecretArn
+        LOG_LEVEL: INFO
+
+Resources:
+  WebhookApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 20
+        ThrottlingRateLimit: 10
+
+  WebhookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Checks Zoom webhook signatures and queues transcript events.
+      Handler: meeting_summariser.handlers.webhook_handler
+      MemorySize: 256
+      Timeout: 10
+      Environment:
+        Variables:
+          WORKER_FUNCTION_NAME: !Ref WorkerFunction
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref SecretArn
+        - Statement:
+            - Effect: Allow
+              Action: lambda:InvokeFunction
+              Resource: !GetAtt WorkerFunction.Arn
+      Events:
+        ZoomWebhook:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref WebhookApi
+            Method: POST
+            Path: /zoom/webhook
+
+  WorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Downloads, summarises and e-mails one meeting transcript.
+      Handler: meeting_summariser.handlers.worker_handler
+      MemorySize: 512
+      Timeout: 600
+      EventInvokeConfig:
+        MaximumRetryAttempts: 2
+      Environment:
+        Variables:
+          EMAIL_TO: !Ref EmailTo
+          EMAIL_FROM: !Ref EmailFrom
+          EMAIL_GREETING: !Ref EmailGreeting
+          TIMEZONE: !Ref TimeZone
+          OPENAI_MODEL: !Ref OpenAIModel
+          CHUNK_TOKENS: !Ref ChunkTokens
+          DEDUPE_TABLE: !If [UseDedupe, !Ref DedupeTable, ""]
+          TIKTOKEN_CACHE_DIR: /tmp/tiktoken
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref SecretArn
+        - !If
+          - UseDedupe
+          - Statement:
+              - Effect: Allow
+                Action: dynamodb:PutItem
+                Resource: !GetAtt DedupeTable.Arn
+          - !Ref AWS::NoValue
+
+  DedupeTable:
+    Type: AWS::DynamoDB::Table
+    Condition: UseDedupe
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: recording_uuid
+          AttributeType: S
+      KeySchema:
+        - AttributeName: recording_uuid
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: expires_at
+        Enabled: true
+
+Outputs:
+  WebhookUrl:
+    Description: Event notification endpoint URL to enter in the Zoom app.
+    Value: !Sub "https://${WebhookApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/zoom/webhook"
+  WorkerFunctionName:
+    Description: Name of the worker function, for reading its logs.
+    Value: !Ref WorkerFunction

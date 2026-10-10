@@ -1,0 +1,9 @@
+# Installed into the Lambda bundle by `sam build` (the functions' CodeUri is src/).
+# Pinned to the versions the test suite was run against. boto3 is left out
+# because the Lambda runtime provides it.
+openai==2.48.0
+tiktoken==0.14.0
+requests==2.32.5
+google-api-python-client==2.198.0
+google-auth==2.50.0
+tzdata==2026.5

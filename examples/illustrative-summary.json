@@ -1,0 +1,29 @@
+{
+  "_note": "Sample summary of weekly-release-sync.vtt, written to show the e-mail layout. It is not output from a model run.",
+  "overview": "The team reviewed the 2.4 release, a crash on older Android phones, user testing of the new onboarding screens and a Q&A session for the support team. The crash fix is merged, but two Android 9 models still crash and the regression run is only half done, so the release moves from Thursday to next Tuesday. Onboarding version B tested best and is planned for 2.5.",
+  "key_points": [
+    "The crash came from the sync queue being read before the database had finished opening. The fix is merged.",
+    "Two older Android 9 models still crash, probably for a different reason. Together they are well under one percent of active users.",
+    "About half of the regression run is done. The payments flow and the settings screens are still to be tested.",
+    "Seven of eight testers finished onboarding version B without help, against four for version A. Version C confused people at the permissions step.",
+    "Version B changes the sign-up code, so it is too late for 2.4.",
+    "Support wants to know what changed in 2.4 and what to tell customers about the crash.",
+    "The staging server certificate expires at the end of the month."
+  ],
+  "decisions": [
+    "Release 2.4 moves from Thursday to next Tuesday so the full regression run can finish.",
+    "Onboarding version B will ship in 2.5, not 2.4.",
+    "The Q&A session with support will be on Thursday morning.",
+    "The platform team will be asked to renew the staging certificate."
+  ],
+  "action_items": [
+    {"task": "Send Tom the logs from the two Android 9 phones that still crash", "owner": "Priya", "due": null},
+    {"task": "Look into the remaining Android 9 crashes", "owner": "Tom", "due": "This afternoon"},
+    {"task": "Finish the regression run", "owner": "Priya", "due": "Wednesday afternoon"},
+    {"task": "Tell the support team that the release has moved to next Tuesday", "owner": "Maya", "due": "Today"},
+    {"task": "Finish the onboarding designs and share them", "owner": "Daniel", "due": "Before next week's sync"},
+    {"task": "Write up the crash's root cause in plain language for support", "owner": "Tom", "due": "Friday"},
+    {"task": "Send an invite for the support Q&A session", "owner": "Maya", "due": null},
+    {"task": "Ask the platform team to renew the staging server certificate", "owner": "Maya", "due": null}
+  ]
+}

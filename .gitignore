@@ -1,0 +1,23 @@
+# Credentials and local deployment settings
+.env
+.auth/
+samconfig.toml
+
+# Build output
+.aws-sam/
+build/
+dist/
+*.egg-info/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
